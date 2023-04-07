@@ -2,6 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Order, Prisma } from '@prisma/client';
 import { PrismaService } from '../utils/prisma.service';
 
+interface Product {
+  name: string;
+  price: number;
+  inStock: number;
+  lastOrdered: Date;
+  totalOrders: number;
+}
+
 @Injectable()
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
@@ -15,7 +23,8 @@ export class OrdersService {
     orderBy?: Prisma.OrderOrderByWithRelationInput;
   }): Promise<Order[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.order.findMany({
+    this.logger.log('Got all orders');
+    return await this.prisma.order.findMany({
       skip,
       take,
       cursor,
@@ -24,28 +33,47 @@ export class OrdersService {
     });
   }
 
-  public findOne(
+  public async order(
     orderWhereUniqueInput: Prisma.OrderWhereUniqueInput,
   ): Promise<Order | null> {
-    return this.prisma.order.findUnique({
+    this.logger.log('Got the one order');
+    return await this.prisma.order.findUnique({
       where: orderWhereUniqueInput,
     });
   }
 
-  public create(data: Prisma.OrderCreateInput): Promise<Order> {
-    return this.prisma.order.create({
+  public async createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
+    this.logger.log('Made a new order');
+    return await this.prisma.order.create({
       data,
     });
   }
 
-  public update(params: {
+  public async updateOrder(params: {
     where: Prisma.OrderWhereUniqueInput;
     data: Prisma.OrderUpdateInput;
   }): Promise<Order> {
+    this.logger.log('Updated existing order');
     const { data, where } = params;
-    return this.prisma.order.update({
+    return await this.prisma.order.update({
       data,
       where,
     });
+  }
+
+  public async getFeaturedProductsList(): Promise<Product[]> {
+    this.logger.log('Got featured products');
+    const allOrders = await this.prisma.order.findMany();
+    const ordersByQuantity = allOrders.sort(
+      (orderA, orderB) => orderA.quantity - orderB.quantity,
+    );
+    const products: Product[] = ordersByQuantity.map((order) => ({
+      name: order.name,
+      price: order.total / order.quantity,
+      lastOrdered: order.createdAt,
+      totalOrders: order.quantity,
+      inStock: order.quantity,
+    }));
+    return products;
   }
 }

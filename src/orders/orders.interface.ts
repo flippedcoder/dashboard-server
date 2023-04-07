@@ -3,4 +3,6 @@ export interface Order {
   name: string;
   total: number;
   quantity: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
