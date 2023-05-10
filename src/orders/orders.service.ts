@@ -33,9 +33,7 @@ export class OrdersService {
     });
   }
 
-  public async order(
-    orderWhereUniqueInput: Prisma.OrderWhereUniqueInput,
-  ): Promise<Order | null> {
+  public async order(orderWhereUniqueInput: Prisma.OrderWhereUniqueInput): Promise<Order | null> {
     this.logger.log('Got the one order');
     return await this.prisma.order.findUnique({
       where: orderWhereUniqueInput,
@@ -49,10 +47,7 @@ export class OrdersService {
     });
   }
 
-  public async updateOrder(params: {
-    where: Prisma.OrderWhereUniqueInput;
-    data: Prisma.OrderUpdateInput;
-  }): Promise<Order> {
+  public async updateOrder(params: { where: Prisma.OrderWhereUniqueInput; data: Prisma.OrderUpdateInput }): Promise<Order> {
     this.logger.log('Updated existing order');
     const { data, where } = params;
     return await this.prisma.order.update({
@@ -64,9 +59,7 @@ export class OrdersService {
   public async getFeaturedProductsList(): Promise<Product[]> {
     this.logger.log('Got featured products');
     const allOrders = await this.prisma.order.findMany();
-    const ordersByQuantity = allOrders.sort(
-      (orderA, orderB) => orderA.quantity - orderB.quantity,
-    );
+    const ordersByQuantity = allOrders.sort((orderA, orderB) => orderA.quantity - orderB.quantity);
     const products: Product[] = ordersByQuantity.map((order) => ({
       name: order.name,
       price: order.total / order.quantity,

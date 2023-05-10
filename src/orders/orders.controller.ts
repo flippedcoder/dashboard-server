@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { Order } from './orders.interface';
 import { OrdersService } from './orders.service';
 
@@ -32,10 +24,7 @@ export class OrdersController {
   }
 
   @Put(':id')
-  public async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() order: Order,
-  ): Promise<Order> {
+  public async update(@Param('id', ParseIntPipe) id: number, @Body() order: Order): Promise<Order> {
     order.updatedAt = new Date();
     return await this.ordersService.updateOrder({
       where: { id },
