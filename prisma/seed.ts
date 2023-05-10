@@ -32,19 +32,50 @@ async function main() {
       updatedAt: new Date('2023/02/24'),
     },
   ];
+  const productData = [
+    {
+      name: 'Table',
+      price: 59.99,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      orders: orderData.slice(0, 2),
+    },
+    {
+      name: 'Water Bottle',
+      price: 9.99,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      orders: orderData.slice(2, 4),
+    },
+    {
+      name: 'Pants',
+      price: 39.99,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      orders: orderData,
+    },
+  ];
   const userData = [
     {
       name: 'alice',
       email: 'alice@example.com',
       orders: orderData.slice(0, 1),
     },
-    { name: 'mark', email: 'mark@example.com', orders: orderData.slice(2, 3) },
+    {
+      name: 'mark',
+      email: 'mark@example.com',
+      orders: orderData.slice(2, 3),
+    },
     {
       name: 'jackie',
       email: 'jackie@example.com',
       orders: orderData.slice(3, 4),
     },
-    { name: 'bob', email: 'bob@example.com', orders: orderData[2] },
+    {
+      name: 'bob',
+      email: 'bob@example.com',
+      orders: orderData[2],
+    },
   ];
 
   return Promise.all([
