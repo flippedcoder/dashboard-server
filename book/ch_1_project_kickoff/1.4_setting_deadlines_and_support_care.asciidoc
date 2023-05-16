@@ -1,0 +1,93 @@
+== Discussing Timelines with Product and Other Teams
+
+At this point in the project, you can assume you have well-defined tickets and the details are as ironed out as possible. Now it's time for one of the higher level conversations. After all of the tickets have been estimated, Product will be ready to set a launch date.
+
+[NOTE]
+====
+Sometimes Product will come to you with a launch date before you've had a chance to estimate tickets. If you find that their timeline is shorter than engineering needs to adequately get through the tickets, push back. Always speak up when timelines are tight. This will save everyone from unnecessary stress.
+====
+
+This is going to involve more than just your team. You might need to coordinate with developers on other projects, the DevOps team, the Support team, and the QA team. It just depends on how far the reach of your changes goes. Don't commit to a launch date until you've talked with these other teams. You'll want to see how your goals fit into theirs and what you can do to make the process easier for them.
+
+=== Talking to other development teams
+
+Your project might depend on another team implementing something in their code that your app consumes. You'll need to give them plenty of heads-up and details so they can include this in their sprint. Development teams aren't always aware of when feature releases for one app crosses over into theirs. Talk to them about what you need and keep it as simple as possible. Mention what your target launch date is and see if that's something they can help you reach.
+
+On the other hand, the new features in your app might cause breaking changes for other teams and you need to let them know what updates they need to make and by when. Don't hesitate to reach out to any teams you think will be affected just to double check. As you find out which teams are affected, update the team docs to show them as a consumer of your app.
+
+Here are some things you'll need to have ready before you talk to them:
+
+- Well-defined technical requirements. Give them a task that's just as defined as if your team were doing it. Also give them time to ask questions if they need more definition.
+- A general idea of where in their code the changes need to be made. You don't have to go in their code and implement the changes, but havinng a clue of where to get started helps.
+- Context behind the change you're requesting. A seemingly small change to you could change the functionality of something important in their app. Make sure they understand why this change is needed.
+- A deadline. Of course you'll ask how long it'll take them to get to it, but have a flexible date in mind.
+- Willingness to do the work. If it would be faster for you to implement the change and the team review it, be open to that as well.
+
+When you know you have everyone across the development teams on the same page, then you can talk to the next set of people. These discussions don't need to happen in this order, but they do need to happen. Whoever is available to talk first can be the first conversation you have.
+
+=== Coordinating with DevOps
+
+When it's time to release to different environments, you'll need to check in with the DevOps team. Since this will be a completely new app, you'll need the infrastructure to be set up for QA to do testing, for production, and any other environments. You may be able to help set up the continuous integration and continuous deployment (CI/CD) pipeline using tools like https://circleci.com/[CircleCI], https://www.jenkins.io/[Jenkins], or https://docs.github.com/en/actions[GitHub Actions]. Although when it comes to provisioning resources and handling infrastructure concerns, that will be completely up to the DevOps team.
+
+They'll give you important information like which cloud provider the app will be hosted on. You'll give them important information like the programming language and frameworks being used. The goal for these two teams on a new project is to at least have a couple of environments up for testing before prepping for production releases. Getting DevOps involved early is going to make things go smoother as development progresses.
+
+Remember, all of these teams you're interacting with already have their own priorities. So you have to take into account that they may not get to you right away. That's why you want to coordinate with DevOps as soon as you have a technical direction. The last thing you want is to put DevOps in a crunched position right before an important deadline. Be ready to jump into a call to go over the project with them so they understand what performance and usage is expected from this app. During your call, there are several things you want to cover:
+
+- Work on developing playbooks for outages and other issues in production. In the moment, it's hard to think and figure out best steps. That's why you and DevOps need to think about this ahead of time.
+- Determine the right number of environments for the app. Some projects can have three environments while others have an environment for every Git branch in existence. Find the right balance of environments that is maintainable on the infrastructure side and flexible for testing and other uses.
+- Figure out the best deployment strategy. It's important for DevOps to know when they need to trigger scripts to run and how often they will run. Some parts will be automated and other parts will need to be run manually. The best strategy is one that works for these two teams.
+- Decide how to handle CI/CD maintenance. Most CI/CD tools use YAML files to define the configurations for a pipeline and these config files live in the project's repo. Sometimes developers make the changes, DevOps makes the changes, or both feel comfortable making changes. Just get everyone on the same page.
+- Agree on the versions of Node that will be supported. Servers aren't always running the latest version of Node and that can cause weird bugs in your app. Know the oldest version of Node your project will run on, just in case.
+- Find out when credentials are cycled. Some apps are dependent on keys and secrets that are maintained as part of the infrastructure, like NPM tokens. Add a reminder ticket to Jira so you can plan to update them before they expire and cause production issues.
+- Choose a location to store assets. For some apps, this will be included as part of the cloud provider and for others a third-party service will be used. Even if you don't come to an absolute answer right now, make another Jira ticket to come back to this.
+- Set up time to test the app together before deploying. You know how the app should behave so DevOps will lean on you to handle some of the environment testing. They can usually get the app running, but you have to verify it's in the correct state.
+- Reserve some time for after the initial app deployment. Things always come up with the first few deploys that need to be fixed. Go ahead and put that meeting on the calendar. If nothing happens, you just reserved celebration time for everyone.
+
+One thing to remember while you're talking to DevOps is that you won't understand everything they're talking about and you don't need to. You'll start to pick up on things as you work with them and it wouldn't hurt to pair with them a few times to see what they do. But even if you don't want to dive into DevOps world, that's fine. They'll handle everything on their side from here.
+
+Now you need to talk with the QA team.
+
+=== Working with QA
+
+While developers, especially seniors, are expected to thoroughly check their work, sometimes bugs slip through. That's why QA teams exist: to make sure those bugs don't reach production. Weird integration issues happen, PRs overwrite functionality, a number of things cause bugs that developers don't catch. Getting new features and bug fixes to QA in a timely manner is important to staying on time for releases. You need to get the new code to them, give them time to test and report back defects, then give you time to fix the defects, and send it back to QA.
+
+You see this loop can take quite a while. So to shorten that time and make sure the highest priority tickets are tested first, include QA in many of your development calls. There will be questions they have about features and bugs from a QA perspective that need to be understood. All of the test cases they write are basically like the history of the app. Many features will have test coverage, whether it's automated or manual. These tests will exist even when the feature doesn't, so QA keeps record of changes in a different way than other teams.
+
+Set up a call between the QA team and your dev team and make sure you've talked about:
+
+- Automated integration tests. This is a responsibility that's usually owned by QA, but since the tests live in the project's repo in many cases, developers can write these tests as well. Also, make the distinction between integration tests and unit tests. Developers should always be the ones writing unit tests.
+- Level of detail in reproduction steps. There's a balance between not enough detail and way too much. Discuss what works best for developers and QA engineers so that everyone knows what to expect.
+- Include them in relevant calls like backlog grooming and stand ups. This way they'll be up to date with any upcoming deadlines, shifted priorities, or releases and they can give updates if they're running into issues.
+- Make it clear that QA should feel comfortable reaching out to the developer that worked on a ticket they're testing. Developers should be willing to pair with QA to help them determine if an issue is a bug or something else like an environment difference.
+
+QA is everybody's best friend because they find a lot of bugs that would have caused issues on production. It's not good for anyone when there are issues on production. They aren't there to tell the developer they're wrong or that their code is bad. They just want to make sure absolutely nothing makes us bring out those playbooks for production fires. Be patient with them as they report defects because they're just doing their job.
+
+The next and probably last team you need to talk with is Support.
+
+=== Planning with Support
+
+These are the people who are in direct contact with users who are experiencing problems. Some of the bugs you will fix come directly from Support. They might even link their support ticket to your bug ticket so they can keep users updated. The Support team is also a source of inspiration for new features. If they keep getting the same requests from different users, it's worth looking into a solution.
+
+Support does a difficult job of dealing with upset customers. You want to make sure that happens as little as possible. When you're talking with Support about an upcoming feature release, they need to know how it affects users. Product should have already talked to them and discussed timelines. You're trying to see what they need from the development team.
+
+Keep in mind that the Support team usually doesn't have highly technical backgrounds. They understand how the app works from a user perspective and as an app admin, but they won't necessarily understand the weeds of the technical details. Understanding where they are coming from will help your communications exponentially. Your job with Support is to translate the technical stuff into the information they need.
+
+Here are some common things that will help:
+
+- Have documentation Support can refer to in order to use the new feature. Describe anything that has changed compared to existing functionality. Highlight values users will need to enter since user input causes many of the issues they receive.
+- Listen when they bring up complaints with the app. Take in the feedback they give you from bugs or other requests and work with Product to prioritize it. That doesn't mean you implement everything they ask for, but it does mean you do a little research into why they're asking about it and how hard it would be to fix.
+- Always sync up on release dates and times. Support will sometimes set aside special time around releases because there are going to be user questions. They need to know exactly when changes are going out so they aren't blindsided with an increase in issues.
+- Do a demo of the finished feature right before release. After the changes have been approved for release, do a quick live demo with Support (and really everybody else). That way they can see how it's supposed to work and ask any questions.
+- Dedicate extra developer time to Support around release days. If they start getting overwhelmed with issues, you might need to rollback the changes. Just be ready to pay close attention to them.
+
+Discussing these things with Support is another way to bring up issues that can be addressed early in the process. It's also a great way to build a relationship between Engineering and Support because you work closer together than it seems. This is the last team you need to coordinate with. Now it's time to bring back all of your findings and notes to make a cohesive plan.
+
+=== Bringing it all together
+
+You've made it to the final step of project kick-off. You have all of your notes from the different team meetings and it's time to distill it all and give the highlights to Product. All of these conversations will help you come up with a reasonable deadline. This is where some negotiation will start. One thing to keep in mind with deadlines is that something in development will go wrong.
+
+Give yourself and your team room to breathe and possibly over-deliver. Remember, under-promise and over-deliver. Unless the feature you need to implement is time-sensitive, like a third-party service being updated, add a few days of padding to account for weird happenings. After you've settled on a date with Product taking all of the other teams' concerns in mind, summon everyone together for one final, short call.
+
+This call will have someone from all of the teams you've talked to. The only things you want to confirm at this point are everyone's action items and deadlines. Having this call is about establishing accountability and triple-checking that everyone is on the same page. As prep for this meeting, take all of this info out of your notes and make a short doc that everyone can reference leading up to the release.
+
+At this point, you have many of the Jira tickets you'll be working on and they're well-defined. You've documented the cross-team connections. Project kick-off is complete. You have everything you need to finally get started writing code. In the next part of this book, you'll build a scalable back-end in TypeScript using the Nest.js framework.

@@ -1,0 +1,19 @@
+Watch out for runaway jobs. They can use up resources unexpectedly and mess up data for different applications. Have a way to manually kill jobs in case you run into this behavior.
+
+You'll need these packages to run cron jobs in Nest.js:
+
+[source, bash]
+----
+npm install --save @nestjs/schedule
+npm install --save-dev @types/cron
+----
+
+You'll need to add the `ScheduleModule` to the root level module imports in `app.module.ts`:
+
+[source, javascript]
+----
++ import { ScheduleModule } from '@nestjs/schedule';
+
+...
++ imports: [OrdersModule, ScheduleModule.forRoot()],
+----

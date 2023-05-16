@@ -1,0 +1,185 @@
+[[back_end_setup]]
+== Setting Up The Back-end
+
+You've got all of your tickets ready to go and you can assume you've been tasked with building the bones of the back-end. The framework of choice at your company is https://nestjs.com/[Nest.js]. It's ok if you've never seen Nest.js or even heard of it before. The docs for it are pretty good and you'll have other code you can references. Reach out to other developers to see why certain architecture and design decisions have been made on existing back-ends.
+
+Before we dive too deep into the weeds, let's discuss why Nest.js is a solid choice. It's basically like a back-end architecture in a box. As soon as you initialize the app, you immediately have access to things like validation, authentication, routing, controllers, data schema, and a lot of other functionality. Instead of piecing everything together, Nest.js gives you everything you need to make a scalable back-end from the beginning. That does mean it's a little less flexible in what you can do with it, but it's the trade-off for all of the up-front scaffolding.
+
+In this part of the book, you're going to:
+
+- Build a back-end with Nest.js
+- Create a data schema using https://www.prisma.io/[Prisma]
+- Make some APIs
+- Integrate a few third-party services
+- Add a couple off background jobs
+- Handle authentation and authorization concerns
+- Write tests
+- Check for security concerns
+- Look into performance enhancements
+- Think about scalability
+- Do a whole lot of debugging
+
+By the time you finish this part of the chapter, you will have a back-end application that meets the specifications for the project. You'll even see where you have to go back and ask other teams questions as you start building.
+
+This is when you get to have some fun as a senior dev. The decisions you make here drive the direction for the future of this project. As you come to questions that have options, ask your team for their technical input. They might be aware of something you don't know about. This not only helps you build a better app, it also helps everyone on the team learn. There are so many considerations for building a back-end that having other input will help you make decisions faster and more confidently.
+
+It can be a little overwhelming being the one to open the empty terminal and bootstrap a completely new project. There's nothing to build on except examples and boilerplate code. It will go whatever direction you and your team decide to take it. This is a fun time because you can really set up the code base to be in a position that's clean to update, test, and expand.
+
+=== Choosing a project approach
+
+This project will be a monolithic back-end, as most back-ends are. This will allow you to build and deploy quickly. You could have also decided to take a microservice approach. Then all of your APIs would be serverless functions. Your choice of back-end architecture is dependent on how the app is going to grow over time. Microservices can take more resources and more engineers to maintain compared to monoliths. Although monoliths can make it more difficult to make larger changes as quickly as you can with microservices.
+
+You'll also be using typescriptlang.org/[TypeScript]. The reason you're starting the project off with TypeScript is to make debugging easier for you and your team. Having some typing in place is better than nothing at all.
+
+=== Setting up Nest
+
+You'll walk through all of the steps to bootstrap this whole project. To start, there are a few environment things you need to have in place. Here are the pre-requisites to run the back-end and later, the front-end as well.
+
+- Node (v19.1.0)
+- npm (9.6.0)
+
+[NOTE]
+====
+Keeping track of these types of version concernns is something a senior dev might silently do. As we go through building this app, you'll be introduced to some leadership best practices, like keeping docs updated and making sure everyone's local environment is running correctly. You'll also have to consider things like linting and formatting rules for the repo and any number of environment configs to keep everything consistent in the code for everyone.
+====
+
+You'll need to install the Nest CLI. The current version of Nest as of this book is 9.2.0. Open a terminal and run the following command:
+
+[source, bash]
+----
+npm i -g @nestjs/cli
+----
+
+Then create a new project with this command:
+
+[source, bash]
+----
+nest new dashboard-server
+----
+
+It will ask you which package manager you want to use. Select npm and hit ENTER.
+
+[source, bash]
+----
+? Which package manager would you ❤️  to use? (Use arrow keys)
+❯ npm 
+  yarn 
+  pnpm 
+----
+
+After that the installation will start and it might take a few minutes. This process is installing all of the project dependencies, scaffolding the entire architecture, adding boilerplate code, and more. It even comes with TypeScript preconfigured. Take some time to go through this repo before you start making changes. Whether you're working on a brand new app like this or a legacy project, always take some time in the beginning to get a high-level understanding of how everything works.
+
+Key things to look at are:
+
+- The +package.json+ so you can see which packages are used in the project.
+- All of the config files so you know how things work under the hood.
+- The test files because these give you a good idea of the major functionality of the app.
+- Some of the actual code to see how developers are expected to write things and if anything can be improved.
+
+After you've poked around a bit, go ahead and run the app with these commands:
+
+[source, bash]
+----
+cd dashboard-server
+npm start
+----
+
+You'll see an output in the terminal like this that will let you know the app is running successfully:
+
+[source, bash]
+----
+> dashboard-server@0.0.1 start
+> nest start
+
+[Nest] 20891  - 03/03/2023, 8:18:46 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 20891  - 03/03/2023, 8:18:46 PM     LOG [InstanceLoader] AppModule dependencies initialized +11ms
+[Nest] 20891  - 03/03/2023, 8:18:46 PM     LOG [RoutesResolver] AppController {/}: +5ms
+[Nest] 20891  - 03/03/2023, 8:18:46 PM     LOG [RouterExplorer] Mapped {/, GET} route +3ms
+[Nest] 20891  - 03/03/2023, 8:18:46 PM     LOG [NestApplication] Nest application successfully started +1ms
+----
+
+This is where one of your first senior decisions comes up. How exactly are you going to test this back-end?
+
+=== Testing the back-end locally
+
+Some popular tools you'll see include https://www.postman.com/downloads/[Postman] and https://paw.cloud/[Paw]. You'll work with Postman in this book (and many times in real life) because it has a free version. This how you'll be able to make requests to your endpoints with different headers, body values, and other values and see what response you get. That's typically how you test the back-end before there is a UI available.
+
+Remember, tools like this are here to help you move faster. Don't get caught up in all of the tool options. At the end of the day, it doesn't matter what you use for your local development as long as you're able to make meaningful progress. Now that you have Postman available, make a GET request to +http://localhost:3000+. You should see +Hello world!+ as the response.
+
+[[fig-2.1-1]]
+.GET request and response in Postman
+image::images/fig-2.1-1.png["GET request and response in Postman"]
+
+Everyone will have a different preference for the tools they like to use for back-end testing and it typically doesn't matter. However, it's easier to troubleshoot when all of the devs on the team are in agreement on this particular tool. You can share your endpoint tests with other devs and that helps everyone find issues faster and more consistently. Eventually your back-end tests can serve as the documentation for the front-end. This will be something worth making a Jira ticket for so you can get it included in a sprint. 
+
+Now that you know the app is working, you can start making changes to get it ready for the team.
+
+=== Updating the README
+
+Start by updating the +README.md+ with specific instructions on how to set up and run the app. There's already a lot of good stuff in there, so you can trim it up a bit and add a few things. A basic update can look like:
+
+[source, markdown]
+----
+# Dashboard Server
+
+## Description
+
+Back-end to support customers built on [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+## Installation
+
+```bash
+$ npm install
+```
+
+## Running the app
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+```
+
+## Test
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+----
+
+It doesn't have to be a huge, doc that expands on your philosophical thoughts about code and the project. Give enough guidance that any dev could clone this repo and get it running. Other docs for the project will be stored somewhere else. As the repo grows, adding more details to the README will be helpful. This is a living doc that everyone should feel comfortable updating as part of their PRs when it's needed.
+
+=== Adding a CHANGELOG
+
+As a best practice, it's good to include a +CHANGELOG.md+ file in your repo. This will help you keep a close record of everything in each release over time. Having this record will help you determine which version of the app contains which updates and that comes in handy when there are issues with production. Here's what the beginnings of this file can look like:
+
+[source, markdown]
+----
+# CHANGELOG
+
+## Guide
+
+- Major releases include breaking changes and the version number will be incremented like, `x.0.0`
+- Minor releases include new features, but no breaking changes and the version number will be incremented like, `0.x.0`
+- Patch releases include bug fixes and performance enhancements and the version number will be incremented like, `0.0.x`
+
+### 0.0.1
+
+- Initial release
+----
+
+As a senior dev, you might be responsible for preparing the release PRs so it's important to make sure updating this file gets included in that process. A good way to remember it is when you update the app version in +package.json+, update this file too.
+
+In many projects, you may need to set up ESLint, Prettier, and TypeScript config files. This app comes with a lot of configs set by default, so you should go through them and add or remove values as needed. That's all for the initial app setup. Now you can turn your attention to building the data schema.

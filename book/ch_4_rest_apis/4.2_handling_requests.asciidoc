@@ -1,0 +1,464 @@
+=== Handling requests
+
+There are so many things to consider when you start working on the back-end. The secret is to just pick an area and focus on it first. You'll come back through and address security, performance, and testing concerns. For now though, you need to get some endpoints working to get the front-end unlocked. You'll start by writing the basic CRUD operations you know the app will need. In this project, you'll need CRUD endpoints for:
+
+- Managing users
+- Managing orders
+- Managing settings
+- Administrative functions
+
+The first 3 sets of endpoints are based on what you already know about the app. The last set of endpoints will come from other discussions with Product. There will be actions the Support team will need access to that no user should ever be able to touch. You'll learn how to handle these different user permission levels and access control later in this chapter. Remember, these endpoints will likely change. The main thing is that you have to start building somewhere.
+
+You can delete some of the boilerplate files, specifically +app.controller.spec.ts+, +app.controller.ts+, and +app.service.ts+. Also go ahead and update +app.module.ts+ to remove the references to these files:
+
+[source, javascript]
+----
+// app.module.ts
+import { Module } from '@nestjs/common';
+
+@Module({
+  imports: [],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}
+----
+
+Nest.js suggests the feature-based architectural design. This is where all of the functionality for a feature is grouped in one folder. That way developers can quickly navigate through the app as it grows. You can start by working on the functionality around orders. In the +src+ directory, make a new subfolder called +orders+. Add the following files inside this new folder:
+
+[source, bash]
+----
+src
+  |__orders
+    |__ orders.controller.spec.ts
+    |__ orders.controller.ts
+    |__ orders.interface.ts
+    |__ orders.module.ts
+    |__ orders.service.spec.ts
+    |__ orders.service.ts
+----
+
+Let's go down the list and explain each of these files as you add code to them. +orders.controller.spec.ts+ is the test file for the order controller. Any functionality defined in the +orders.controller.ts+ should have a corresponding test in this file. Here's some boilerplate you can add for now:
+
+[source, javascript]
+----
+// orders.controller.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { OrdersController } from './orders.controller';
+
+describe('OrdersController', () => {
+  let controller: OrdersController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [OrdersController],
+    }).compile();
+
+    controller = module.get<OrdersController>(OrdersController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+----
+
+The +orders.controller.ts+ file is where you define all of the endpoints for this specific feature. Here's the boilerplate code for this file:
+
+[source, javascript]
+----
+// orders.controller.ts
+import { Controller } from '@nestjs/common';
+
+@Controller('orders')
+export class OrdersController {}
+----
+
++orders.interface.ts+ is where the type definition for the orders is defined. You'll use the +interface+ keyword here since Nest.js follows an MVC pattern and you might need to extend these definitions as the app grows. You can add more boilerplate for now:
+
+[source, javascript]
+----
+// orders.interface.ts
+export interface Orders {}
+----
+
+In Nest.js, modules are needed to register controllers, services, and all other imported sub-modules. So you'll need a +orders.module.ts+ to specify all of the pieces needed for the orders functionality to work. You can import and use the components you have available right now:
+
+[source, javascript]
+----
+// orders.module.ts
+import { Module } from '@nestjs/common';
+import { OrdersService } from './orders.service';
+import { OrdersController } from './orders.controller';
+
+@Module({
+  exports: [OrdersService],
+  providers: [OrdersService],
+  controllers: [OrdersController],
+})
+export class OrdersModule {}
+----
+
++orders.service.spec.ts+ is another test file, this time it's focused on the functionality in the order service. Again, anything that will be used by the app from the order service should have a test in here. You can put a small test in here for now so that you have a starting point for adding more tests:
+
+[source, javascript]
+----
+// orders.service.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { OrdersService } from './orders.service';
+
+describe('OrdersService', () => {
+  let service: OrdersService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [OrdersService],
+    }).compile();
+
+    service = module.get<OrdersService>(OrdersService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+----
+
+The last file is +orders.service.ts+. This is where the business logic for the orders functionality is handled. Any calculations, sorting, filtering, or other data manipulation is likely happening in this file. Add a bit of boilerplate for now so you can come back to it:
+
+[source, javascript]
+----
+// orders.service.ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class OrdersService {}
+----
+
+You also need to update the +app.module.ts+ file to import this new orders module. Update that file to match this:
+
+[source, javascript]
+----
+// app.module.ts
+import { Module } from '@nestjs/common';
++ import { OrdersModule } from './orders/orders.module';
+@Module({
++ imports: [OrdersModule],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}
+----
+
+You'll dig into these files more as you build out the functionality and start taking into consideration all of the things that come up on the back-end, like security, performance, data changes, and other tasks. For now, you can start by defining the orders endpoints in the controller.
+
+Usually you would have some tickets written to break out this work into small tasks. Throughout this book, you'll follow along with the way I approach this type of work to simulate knowing the exact items to work based on tickets. So open +orders.controller.ts+ and add the following code:
+
+[source, javascript]
+----
+// orders.controller.ts
+import { Controller } from '@nestjs/common';
+import { OrdersService } from './orders.service';
+
+@Controller('orders')
+export class OrdersController {
+  constructor(private readonly ordersService: OrdersService) {}
+}
+----
+
+Nest.js uses dependency injection here to create a reference to the +OrdersService+ from inside your controller. Now you can use any methods from the service in your controller. These files are responsible for how you are able to handle requests from users, get the data in the format you need, and return it in a response. Another thing to note in Nest.js is that services can also be providers. The definition of a provider is a service class, guard, or other middleware.
+
+Now you can define all of the endpoints with respect to the methods you need to implement in the service. This is a good way to take stock on exactly what endpoints you need to write code for and how they relate to each other. Add the following to +orders.controller.ts+ below the constructor:
+
+[source, javascript]
+----
+// orders.controller.ts
+import {
++  Body,
+  Controller,
++  Get,
++  Param,
++  ParseIntPipe,
++  Post,
++  Put,
+} from '@nestjs/common';
++ import { Orders } from './orders.interface';
+import { OrdersService } from './orders.service';
+
+@Controller('orders')
+export class OrdersController {
+  constructor(private readonly ordersService: OrdersService) {}
+
++  @Get()
++  public findAll(): Array<Orders> {
++    return this.ordersService.findAll();
++  }
+
++  @Get(':id')
++  public findOne(@Param('id', ParseIntPipe) id: number): Orders {
++    return this.ordersService.findOne(id);
++  }
+
++  @Post()
++  public create(@Body() order: Orders): Orders {
++    return this.ordersService.create(order);
++  }
+
++  @Put(':id')
++  public update(
++    @Param('id', ParseIntPipe) id: number,
++    @Body() order: Orders,
++  ): Orders {
++    return this.ordersService.update(id, order);
++  }
+}
+----
+
+There are four endpoints defined here: two of them are GET endpoints which allows you to fetch data, one is a POST endpoint which lets you send data to make a new record on the back-end, and one is a PUT endpoint that lets you update on the back-end. In the first GET request, you call the +findAll+ method to retrieve all of the orders from the orders service. This hasn't been defined yet, but you'll write that logic soon. You notice there's a +@Get+ decorator on this request. The endpoint will look like this: +GET /orders+. This is how Nest.js distinguishes between different HTTP methods on these routes.
+
+There is also the +public+ keyword in front of the request. This tells Nest.js that this route is available to anyone. There are other keywords, like +private+, that make sure that code isn't accessible outside of the app. The next GET request is to retrieve one order based on a given ID. In the +@Get()+ decorator, there's also a parameter included this time.
+
+This +id+ is how you will determine which order to return. The endpoint will look like this: +GET /order/:id+. Again, you haven't written the +findOne+ method yet, but it's coming. The GET request has a few new things to note: the +@Param+ decorator and +ParseIntPipe+. +@Param+ makes route parameters accessible as properties in your methods and +ParseIntPipe+ converts the ID to a number.
+
+Next is the POST request. This will handle what happens when users create new orders. The endpoint will look like this: +POST /order+. In this case, you're using the +@Body+ decorator to parse the HTTP body from the request. Under the hood, Nest.js uses +JSON.parse+ to pass you an object you can use in your controller.
+
+After this is the PUT request. When a user wants to update an order, the order ID will be passed in the request as a parameter and any updated values will be passed in the request body.
+
+[NOTE]
+====
+It's easy to switch between PATCH and PUT methods for updates. Do a little research on which offers the best security for your application.
+====
+
+These four endpoints are a good starting place and will be enough to unblock the front-end as you work on the remaining endpoints. Since this is like the list of functionality you need to write, it's time to turn your attention to the service methods that need to be defined.
+
+You'll need to connect to your database using Prisma first.
+// TODO: move this to the data schema chapter
+
+Now you run into a case where you need to write some helper functionality. You want to make sure you only have one connection to the database from the app at all times, so you need to abstract the connection out of the services.
+
+=== Establishing a working database connection
+
+Many projects have a folder called +utils+ or +helpers+ or something like this. You'll need to create one of those to hold the service you're going to use to instantiate +PrismaClient+ and connect to the database. In the +src+ folder, make a new folder called +utils+. In this folder, make a file called +prisma.service.ts+ and put the following code in it:
+
+[source, javascript]
+----
+// prisma.service.ts
+import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async enableShutdownHooks(app: INestApplication) {
+    this.$on('beforeExit', async () => {
+      await app.close();
+    });
+  }
+}
+----
+
+I got this code from the Nest.js documentation and you can read through it to get all of the details. You don't have to worry about writing everything from scratch most of the time if you spend a few minutes reading and looking through docs. That's a thing you'll find senior devs doing all the time.
+// TODO: end move
+
+With the connection instance prepared, go ahead and switch over to +orders.service.ts+. This is where you will implement the logic behind those routes.
+
+You'll start by adding a few more imports to the file:
+
+[source, javascript]
+----
+// orders.service.ts
+import { Injectable, Logger } from '@nestjs/common';
++ import { Order, Prisma } from '@prisma/client';
++ import { PrismaService } from '../utils/prisma.service';
+----
+
+Then you'll need add the +constructor+ method to initialize your Prisma service to connect the orders functionality from the app to the database. Following that, you need to create a new +logger+ to capture events as they happen. I'll go in depth on logging and determining when to do so later in the book, but for now go ahead and add this object as well:
+
+[source, javascript]
+----
+// orders.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { Order, Prisma } from '@prisma/client';
+import { PrismaService } from '../utils/prisma.service';
+
++ @Injectable()
++ export class OrdersService {
++   constructor(private prisma: PrismaService) {}
++   private readonly logger = new Logger(OrdersService.name);
++ }
+----
+
+With these objects ready, you can start writing the functionality for fetching all of the orders from the database. This will include different filters built into Prisma. 
+
+[source, javascript]
+----
+// orders.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { Order, Prisma } from '@prisma/client';
+import { PrismaService } from '../utils/prisma.service';
+
+@Injectable()
+export class OrdersService {
+  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(OrdersService.name);
+
+   + public async orders(params: {
+   +     skip?: number;
+   +     take?: number;
+   +     cursor?: Prisma.OrderWhereUniqueInput;
+   +     where?: Prisma.OrderWhereInput;
+   +     orderBy?: Prisma.OrderOrderByWithRelationInput;
+   + }): Promise<Order[]> {
+   +     const { skip, take, cursor, where, orderBy } = params;
+   +     this.logger.log('Got all orders');
+   +     return this.prisma.order.findMany({
+   +        skip,
+   +        take,
+   +        cursor,
+   +        where,
+   +        orderBy,
+   +    });
+   + }
+}
+----
+
+This +orders+ function has the +public+ keyword which means it can be accessed when this object is instantiated. It's also an asynchronous function because there will be some time between making the database queries and getting a result. Then you take in some parameters to define the data you wanted returned. All of these parameters are part of Prisma's API and I really encourage to go through their docs and learn more. Inside of this function, you also add a logger to track each time the orders are fetched. You can customize this log record to include more unique information too. Finally, you make the request to the database using the +findMany+ method.
+
+Now add the following code to implement the functionality to fetch one specific order:
+
+[source, javascript]
+----
+// orders.service.ts
+...
+  public async orders(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.OrderWhereUniqueInput;
+    where?: Prisma.OrderWhereInput;
+    orderBy?: Prisma.OrderOrderByWithRelationInput;
+  }): Promise<Order[]> {
+    const { skip, take, cursor, where, orderBy } = params;
+    this.logger.log('Got all orders');
+    return this.prisma.order.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
+  }
+
++ public order(
++   orderWhereUniqueInput: Prisma.OrderWhereUniqueInput,
++ ): Promise<Order | null> {
++   this.logger.log('Got the one order');
++   return this.prisma.order.findUnique({
++     where: orderWhereUniqueInput,
++   });
++ }
+}  
+----
+
+In the +order+ function, you're using the Prisma typing to define the +id+ that you need for a specific order. Inside the function, you log when one order is retrieved. After that, you use the +findUnique+ method with the +id+ from the request to get that order. The next piece of functionality you'll implement is to handle creating new orders. Add the following code to the service file:
+
+[source, javascript]
+----
+// orders.service.ts
+...
+  public order(
+    orderWhereUniqueInput: Prisma.OrderWhereUniqueInput,
+  ): Promise<Order | null> {
+    this.logger.log('Got the one order');
+    return this.prisma.order.findUnique({
+      where: orderWhereUniqueInput,
+    });
+  }
+
++ public createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
++   this.logger.log('Made a new order');
++   return this.prisma.order.create({
++     data,
++   });
++ }
+}
+----
+
+The +createOrder+ function takes in a data object with a shape based on the schema and it returns the created order. Again, you have a logger to note when an order was created. Then you use the +create+ method to create a new database order record. Something else that'll I'll cover later in this chapter, on app security, is input sanitation and validation, but we'll leave this as it is for now.
+
+The last bit of functionality to unblock some of the front-end work is to add a way to update an order. Add the following code to your file:
+
+[source, javascript]
+----
+// orders.service.ts
+...
+  public createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
+    this.logger.log('Made a new order');
+    return this.prisma.order.create({
+      data,
+    });
+  }
+
++ public updateOrder(params: {
++   where: Prisma.OrderWhereUniqueInput;
++   data: Prisma.OrderUpdateInput;
++ }): Promise<Order> {
++   this.logger.log('Updated existing order');
++   const { data, where } = params;
++   return this.prisma.order.update({
++     data,
++     where,
++   });
++ }
+}
+----
+
+With +updateOrder+, you accept an +id+ and +data+ from the request. Then you log the event. Lastly, you call the +update+ method with the parameters that were passed in. If you haven't stopped to make a Git commit, this is a good time to do so. Now you have the back-end in a state where other back-end devs can come in and add more functionality or configurations. One of the hardest tasks is to set something up that others can pick apart and improve. That's what you're doing right now.
+
+Since everyone is unblocked, you can turn your attention to more detailed requests, like getting the featured orders.
+
+=== Creating a more advanced endpoint
+
+Now you need to add an endpoint get the featured products for the front-end. This is an example of doing the calculations on the back-end. You could derive the featured products from calling endpoints and doing filtering and sorting on the front-end, but that would slow down the app for users. The way Product has described this to you is that they want to show off the products that have the most orders.
+
+So you can look through all of the orders, find the quantities of different products that have been ordered, and then generate an ordered list of those products based on quantity. This will involve a little sorting and filtering logic in +orders.service.ts+. Add the following code:
+
+[source, javascript]
+----
+// orders.service.ts
+...
+  public updateOrder(params: {
+    where: Prisma.OrderWhereUniqueInput;
+    data: Prisma.OrderUpdateInput;
+  }): Promise<Order> {
+    this.logger.log('Updated existing order');
+    const { data, where } = params;
+    return this.prisma.order.update({
+      data,
+      where,
+    });
+  }
+
++ public async getFeaturedProductsList(): Promise<Product[]> {
++   this.logger.log('Got featured products');
++   const allOrders = await this.prisma.order.findMany();
++   const ordersByQuantity = allOrders.sort(
++     (orderA, orderB) => orderA.quantity - orderB.quantity,
++   );
++   const products: Product[] = ordersByQuantity.map((order) => ({
++     name: order.name,
++     price: order.total / order.quantity,
++     lastOrdered: order.createdAt,
++     totalOrders: order.quantity,
++     inStock: order.quantity,
++   }));
++   return products;
++ }
+}
+----
+
+In +getFeaturedProductsList+, you have a little more data manipulation happening before the final list of products is sent in the response. This is a piece of functionality that could technically be handled on the front-end, but it's better to handle on the back-end. You'll run into a lot of situations where endpoints have complex logic because of business rules around the application. This is a very small example.
+
+As you build on this application through out the book, you'll start to add calls to third-party services, handle data from different sources, and work on security concerns. All of these will involve endpoints and other private functions that you'll add on as you move through the tasks on your sprint.

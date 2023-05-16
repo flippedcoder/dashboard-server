@@ -1,0 +1,58 @@
+[[project_intro]]
+== Kicking Off the Project
+
+Welcome to the team! You're new a senior full-stack JavaScript developer. That means you're responsible for helping drive the technical direction of the project and helping coordinate efforts across different teams in order to get stuff done. Your task is to start a greenfield app based on designs and conversations with a number of teams.
+
+In this book, we'll go through all of the discussions and decisions that you'll be involved in throughout the software development life cycle (SDLC) and how these things will directly affect the work you and your team do. This book is presented to you in the form of a real project. We'll take this project from designs, all the way through back-end and front-end development, and end with the path to deployment.
+
+The first part of this book will be relatively short and cover how you translate designs into tasks and questions that you'll have to ask the Product team and other teams. The second part of the book focuses on creating the back-end of this project. You'll work with https://nestjs.com/[Nest.js] as we walk through the a number of considerations, like security and third-party services, for development.
+
+After you have the back-end ready, you'll switch over to building the front-end with React in part three of the book. You'll build the user interface (UI) for this project and cover concerns associated with front-end apps, like responsiveness and performance. Finally in part 4, you'll dive into the details of connecting the front-end, back-end, and other systems to build and deploy a full-stack app to production. By the time you finish this book, you should feel comfortable jumping into any part of a project and asking questions that will help clarify tasks as well as provide techincal advice.
+
+You'll notice that each part of the book varies in length. That's because it's supposed to help break down where a lot of time really gets spent during development. Some parts of a project take more time than others or have different feedback cycles. This book is trying to reflect real-world conditions as closely as possible.
+
+My goal with this book is to give you a reference, kind of a sanity check, when you're working on both greenfield and legacy projects. Some questions are relevant for both types of projects. Many applications have core commonalities that you can use, regardless of the industry you work in. When those moments come where you find yourself questioning if you're crazy becasue you've never heard of something, hopefully this book will make you feel more confident asking those "simple" questions.
+
+Let's break down what you'll learn in this part:
+
+- How to work with a Product and a number of other teams to fully define features
+- How to take a design and break it into small, actionable tasks
+- How to determine the data you'll need to work with
+
+Here's the description of the project you'll be working on. You work on an e-commerce platform that has access to a lot of user data, including some _personal identifiable information_ (PII), and connects with multiple third-party services. You and your team have been tasked with creating a user dashboard so customers can see information about their order history and other actions they have taken, make purchases, and interact with their digital purchases, like ebooks. They'll also be able to take different actions based on their permissions within the app.
+
+You're starting with a fresh Product and Design team that you'll work with to make this dashboard a reality. The first part of the project will likely involve Product and Design working closely together to make some mock screens for you and possibly some behavioral docs. These mocks will be shown to you and discussed in a project kick-off meeting.
+
+=== Going through the designs
+
+This kick-off meeting typically involves the Product team going through all of the mocks with you. They'll take you through the user flow, show you how users interact with the app, and give you an idea of the data you need. At this point in the project, get comfortable asking a lot of questions. There are usually things that come up when you start looking at the designs from a technical perspective that the Product or Design teams haven't considered.
+
+Remember, this whole process is very collaborative. Asking questions early and often will make things smoother as the project moves forward. Right now there are only two screens that need to be built for a proof of concept, but Product has told you the functionality will expand over time. Let's take a look at these screens a go through the user flow.
+
+[[fig-1.1-1]]
+.Overall design in Figma
+image::images/fig-1.1-1.png["app design in Figma"]
+
+[[fig-1.1-2]]
+.User information screen in Figma
+image::images/fig-1.1-2.png["user info screen design in Figma"]
+
+[[fig-1.1-3]]
+.User actions screen in Figma
+image::images/fig-1.1-3.png["user actions screen design in Figma"]
+
+[[fig-1.1-4]]
+.Mobile design for both screens in Figma
+image::images/fig-1.1-4.png["app designs with mobile view in Figma"]
+
+The images are from a commonly used design tool called https://www.figma.com[Figma]. A lot of designers use this tool when they create the mocks for an app or a particular feature. Another tool you might run into is https://www.invisionapp.com/[inVision]. These Figma designs also have the HTML and CSS in them, so they can be useful for developers when they want to check dimensions while arranging elements on the page.
+
+By the time you see these mock designs, Product and Design will have had several meetings trying to iron out as much detail as they can. That doesn't mean they'll have everything figured out and that's where you come in. Based on these designs and the explanation of how a user will interact with the app, you have to work with your team to decide the technical approach you want to take.
+
+Let's walk through these designs, similar to how you will with your Product team. On the first screen, there's a navigation bar at the top of the page with links to other areas in the app. Then, there is a featured products section, along with the users most recent order. There's a sortable table that displays all of the user's orders with several columns. Finally, there's a footer that includes links to information about other parts of the e-commerce platform.
+
+On the second screen, there are several sections that have fields the user can interact with. There are a few settings users can toggle, fields that they can update, and actions they can take based on their purchases. This screen has more complexity than the first screen, so you'll want to take time and really go through this with the team. As the senior developer on the team, Product and Design will often turn to you for the final say on technical decisions.
+
+Never make promises without talking to your team first, no matter how hard you get pushed. With these designs in hand and a few documents on how the screens are supposed to work, it's time to develop an understanding of the business logic before you go to the team. Having a solid understanding of the business decisions behind the designs is a huge help when you're trying to explain things to other developers.
+
+As you go through this information, there are a lot of things you'll need to consider based on the designs you have.

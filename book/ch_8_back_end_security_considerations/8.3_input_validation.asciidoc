@@ -1,0 +1,1 @@
+Don't fall into the thought that all requests will come from the front-end. Attackers might bypass front-end validation by making requests directly to the API.

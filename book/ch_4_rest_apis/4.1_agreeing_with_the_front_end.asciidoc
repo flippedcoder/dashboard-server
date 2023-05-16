@@ -1,0 +1,30 @@
+== Writing an API
+
+With the data schema established, you can start writing the first create-read-update-delete (CRUD) functionality. You'll slowly build on top of these common actions as you add more complex functionality where you interface with third-party services, authorization, and background jobs. For now, you want to build enough to unblock more of the Jira tickets so the front-end can start integrating with the back-end as soon as possible. That's why one of the first conversations you need to have is with the front-end devs. In this scenario, it'll still be you, but it's good to know what to expect from those conversations.
+
+=== Agreeing with the front-end on data shape
+
+You already talked to the front-end devs about the data structure when you were writing the schema. There are always a few things to iron out when it's actually time to connect the front-end to the back-end. At this point, there's a chance development on the front-end has already started so they can have the visual part of the app ready. That means the devs working on this have made assumptions about how the responses will look when they request data.
+
+Implementation time always reveals something that wasn't considered, even if it's something small. Some of the questions you'll get from the front-end will be:
+
+- What are the parameters required to make a request?
+- What are the expectations for how errors are handled in responses?
+- What is the shape of the response for each request?
+- How many data entries are returned at a time for the table data?
+- Should any endpoints be called in a specific order?
+- A discussion on the number of requests it takes to get data.
+
+Many of these questions can be answered and documented with a tool like Postman or Paw. The back-end devs will need to test the endpoints anyways so you will be using one of these tools. Then you can save the requests and responses you get in collections that can be shared with the front-end. This can become the source of truth for how endpoints are expected to behave. Having this in place instead of documents will make testing in the long-term much easier because you will naturally update the collections as you work on tasks.
+
+If you didn't get a chance to make a decision on that tool yet, now is a great time to stop and do that. You can also explain how this is a huge benefit if the Product team needs convincing to give you time to work on this. When you have all of your app's endpoints documented and interactive in Postman collections and those are available to any team that wants them, it speeds up development and testing. The devs and QA team will be able to validate the endpoints are working correctly when they run into bugs. They won't need to stop a back-end dev to figure out basic questions like what endpoints are available and what the parameters are.
+
+You can also do Product demos on to show off back-end features that are waiting for the front-end. Push for some time to set this up and include the whole team in the process. That way everyone understands how it works from the beginning. As far as the number of requests it takes to retrieve data, you will need to take some time to really think about the way you build your endpoints.
+
+If the front-end devs have raised concerns about the number of requests they need to make or any filtering or calculations they need to handle, start making updates there. If there is data coming from multiple tables or third-party services and that's what is causing the number of requests to increase, you might need to add another endpoint that combines those table queries into one request for the front-end. The front-end shouldn't have to handle any calculations and you need to handle those on the back-end.
+
+On the opposite side, it's ok to push back on the front-end if the back-end is optimized and is following best practices. You don't want to sacrifice code quality to make the front-end contol what the back-end does. This is more of a philosophical view and you should develop your own based on your experience. I'm just sharing my views with you based on the projects I've worked on. Data typically drives design, therefore the back-end typically drives the front-end. This is where you get to flex some creativity in your code.
+
+You don't want to make things difficult for the front-end and you don't want to compromise the back-end too much. After testing a few approaches, if you see there's no good way to trim the number of requests, just let them know. But calculations should always be on the back-end. This even helps with security because attackers won't be able to manipulate calculations through the front-end.
+
+It might take a call or two to get all of these details really pinned down, but you'll do it. Then it'll be time to write the endpoints and handle all of the questions you just discussed.
