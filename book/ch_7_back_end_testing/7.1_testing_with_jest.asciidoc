@@ -1,5 +1,0 @@
-Test for:
-- Every endpoint
-- Possible error states
-- Potential wrong inputs
-- Business logic details
