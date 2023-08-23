@@ -11,18 +11,19 @@ datasource db {
 }
 
 model User {
-  id     Int     @id @default(autoincrement())
-  email  String  @unique
-  name   String
-  orders Order[]
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  name        String
+  permissions String[]
+  orders      Order[]
 }
 
 model Product {
   id        String   @id @default(uuid())
   name      String
   price     Float
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   orders    Order[]
 }
 
@@ -31,8 +32,8 @@ model Order {
   name      String
   total     Float
   products  Product[]
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   userId    Int?
   User      User?     @relation(fields: [userId], references: [id])
 }
