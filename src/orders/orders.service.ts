@@ -42,6 +42,9 @@ export class OrdersService {
 
   public async createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
     this.logger.log('Made a new order');
+    data.createdAt = new Date();
+    data.updatedAt = new Date();
+
     return await this.prisma.order.create({
       data,
     });
@@ -52,6 +55,14 @@ export class OrdersService {
     const { data, where } = params;
     return await this.prisma.order.update({
       data,
+      where,
+    });
+  }
+
+  public async deleteOrder(params: { where: Prisma.OrderWhereUniqueInput }): Promise<Order> {
+    this.logger.log('Deleted existing order');
+    const { where } = params;
+    return await this.prisma.order.delete({
       where,
     });
   }
