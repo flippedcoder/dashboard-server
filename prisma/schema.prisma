@@ -19,21 +19,23 @@ model User {
 }
 
 model Product {
-  id        String   @id @default(uuid())
-  name      String
-  price     Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id              String   @id @default(uuid())
+  name            String
+  price           Float
+  stripeProductId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  orders          Order[]
 }
 
 model Order {
-  id        Int       @id @default(autoincrement())
-  name      String
-  total     Float
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  userId    Int?
-  User      User?     @relation(fields: [userId], references: [id])
+  id              Int       @id @default(autoincrement())
+  stripeInvoiceId String
+  name            String
+  total           Float
+  products        Product[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  userId          Int?
+  User            User?     @relation(fields: [userId], references: [id])
 }
