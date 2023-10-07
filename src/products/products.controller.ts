@@ -24,7 +24,10 @@ export class ProductsController {
   }
 
   @Put(':id')
-  public async update(@Param('id', ParseIntPipe) id: number, @Body() product: Product): Promise<Product> {
+  public async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() product: Product,
+  ): Promise<Product> {
     product.updatedAt = new Date();
     return await this.productsService.updateProduct({
       where: { id },

@@ -7,7 +7,11 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
   private readonly logger = new Logger(UsersService.name);
 
-  public async users(params: { skip?: number; take?: number; orderBy?: Prisma.UserOrderByWithRelationInput }): Promise<User[]> {
+  public async users(params: {
+    skip?: number;
+    take?: number;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+  }): Promise<User[]> {
     const { skip, take, orderBy } = params;
     this.logger.log('Got all users');
     return await this.prisma.user.findMany({
@@ -31,7 +35,10 @@ export class UsersService {
     });
   }
 
-  public async updateUser(params: { where: Prisma.UserWhereUniqueInput; data: Prisma.UserUpdateInput }): Promise<User> {
+  public async updateUser(params: {
+    where: Prisma.UserWhereUniqueInput;
+    data: Prisma.UserUpdateInput;
+  }): Promise<User> {
     this.logger.log('Updated existing user');
     const { data, where } = params;
     return await this.prisma.user.update({

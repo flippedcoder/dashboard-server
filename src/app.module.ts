@@ -6,7 +6,14 @@ import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 @Module({
-  imports: [AuthModule, OrdersModule, StripeModule, ProductsModule, UsersModule, ScheduleModule.forRoot()],
+  imports: [
+    AuthModule,
+    OrdersModule,
+    StripeModule,
+    ProductsModule,
+    UsersModule,
+    ScheduleModule.forRoot(),
+  ],
   controllers: [],
   providers: [],
 })

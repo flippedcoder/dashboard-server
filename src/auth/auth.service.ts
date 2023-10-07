@@ -25,7 +25,9 @@ export class AuthService {
     });
   }
 
-  public async accessToken(orderWhereUniqueInput: Prisma.OrderWhereUniqueInput): Promise<Auth | null> {
+  public async accessToken(
+    orderWhereUniqueInput: Prisma.OrderWhereUniqueInput,
+  ): Promise<Auth | null> {
     this.logger.log('Got the one order');
     return await this.prisma.auth.accessToken({
       where: orderWhereUniqueInput,
@@ -39,7 +41,10 @@ export class AuthService {
     });
   }
 
-  public async logout(params: { where: Prisma.OrderWhereUniqueInput; data: Prisma.OrderUpdateInput }): Promise<Auth> {
+  public async logout(params: {
+    where: Prisma.OrderWhereUniqueInput;
+    data: Prisma.OrderUpdateInput;
+  }): Promise<Auth> {
     this.logger.log('Updated existing order');
     const { data, where } = params;
     return await this.prisma.auth.logout({

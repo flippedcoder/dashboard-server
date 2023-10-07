@@ -7,7 +7,11 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
   private readonly logger = new Logger(ProductsService.name);
 
-  public async products(params: { skip?: number; take?: number; orderBy?: Prisma.ProductOrderByWithRelationInput }): Promise<Product[]> {
+  public async products(params: {
+    skip?: number;
+    take?: number;
+    orderBy?: Prisma.ProductOrderByWithRelationInput;
+  }): Promise<Product[]> {
     const { skip, take, orderBy } = params;
     this.logger.log('Got all orders');
     return await this.prisma.product.findMany({
@@ -17,7 +21,9 @@ export class ProductsService {
     });
   }
 
-  public async product(productWhereUniqueInput: Prisma.ProductWhereUniqueInput): Promise<Product | null> {
+  public async product(
+    productWhereUniqueInput: Prisma.ProductWhereUniqueInput,
+  ): Promise<Product | null> {
     this.logger.log('Got the one order');
     return await this.prisma.product.findUnique({
       where: productWhereUniqueInput,
@@ -31,7 +37,10 @@ export class ProductsService {
     });
   }
 
-  public async updateProduct(params: { where: Prisma.ProductWhereUniqueInput; data: Prisma.ProductUpdateInput }): Promise<Product> {
+  public async updateProduct(params: {
+    where: Prisma.ProductWhereUniqueInput;
+    data: Prisma.ProductUpdateInput;
+  }): Promise<Product> {
     this.logger.log('Updated existing order');
     const { data, where } = params;
     return await this.prisma.product.update({
