@@ -15,3 +15,11 @@ export class CreateOrderDto {
   @IsNumber()
   total: number;
 }
+
+export class UpdateOrderDto {
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  total: number;
+}

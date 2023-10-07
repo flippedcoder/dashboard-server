@@ -1,5 +1,16 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
-import { CreateOrderDto, Order } from './orders.interface';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { CreateOrderDto, Order, UpdateOrderDto } from './orders.interface';
 import { OrdersService } from './orders.service';
 import { User } from '@prisma/client';
 
@@ -50,12 +61,21 @@ export class OrdersV1Controller {
   }
 
   @Patch(':id')
-  public async update(@Param('id', ParseIntPipe) id: number, @Body() order: Order): Promise<Order> {
-    order.updatedAt = new Date();
-    return await this.ordersService.updateOrder({
-      where: { id },
-      data: order,
-    });
+  public async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() order: UpdateOrderDto,
+  ): Promise<Order> {
+    try {
+      return await this.ordersService.updateOrder({
+        where: { id },
+        data: order,
+      });
+    } catch (err) {
+      if (err) {
+        throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException('Generic', HttpStatus.BAD_GATEWAY);
+    }
   }
 
   @Delete(':id')

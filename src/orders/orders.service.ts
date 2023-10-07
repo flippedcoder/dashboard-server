@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Order, Prisma } from '@prisma/client';
 import { PrismaService } from '../utils/prisma.service';
 
@@ -50,13 +50,30 @@ export class OrdersService {
     });
   }
 
-  public async updateOrder(params: { where: Prisma.OrderWhereUniqueInput; data: Prisma.OrderUpdateInput }): Promise<Order> {
-    this.logger.log('Updated existing order');
+  public async updateOrder(params: {
+    where: Prisma.OrderWhereUniqueInput;
+    data: Prisma.OrderUpdateInput;
+  }): Promise<Order> {
     const { data, where } = params;
-    return await this.prisma.order.update({
-      data,
-      where,
-    });
+    this.logger.log(`Updated existing order ${data.name}`);
+
+    try {
+      const updatedOrder = await this.prisma.order.update({
+        data: {
+          ...data,
+          updatedAt: new Date(),
+        },
+        where,
+      });
+
+      this.logger.log(`Updated for existing order ${updatedOrder.id} successful`);
+
+      return updatedOrder;
+    } catch (err) {
+      this.logger.log(`Updated for existing order ${data.name} failed`);
+
+      throw new HttpException(err.message, HttpStatus.CONFLICT);
+    }
   }
 
   public async deleteOrder(params: { where: Prisma.OrderWhereUniqueInput }): Promise<Order> {
