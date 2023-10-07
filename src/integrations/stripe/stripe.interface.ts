@@ -1,17 +1,39 @@
-export interface StripeGet {
-  id: number;
+import { IsNotEmpty, MaxLength, Min, MinLength } from 'class-validator';
+
+export class CreateStripeProductDto {
+  @IsNotEmpty()
   name: string;
-  total: number;
-  quantity: number;
-  createdAt: Date;
-  updatedAt: Date;
+
+  @IsNotEmpty()
+  @MinLength(10, {
+    message: 'description is too short',
+  })
+  description: string;
+
+  @IsNotEmpty()
+  default_price_data: StripePriceData;
 }
 
-export interface StripePost {
-  id: number;
+export class CreateStripeProductResponse {
+  id: string;
   name: string;
-  total: number;
+}
+
+export class CreateStripePaymentDto {
+  @IsNotEmpty()
+  priceId: string;
+
+  @MinLength(1, {
+    message: 'quantity has to be at least 1',
+  })
   quantity: number;
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+class StripePriceData {
+  @MinLength(3)
+  @MaxLength(3)
+  currency: string;
+
+  @Min(10)
+  unit_amount: number;
 }

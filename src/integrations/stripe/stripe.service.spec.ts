@@ -15,7 +15,4 @@ describe('StripeService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  it('should connect to Stripe API', () => {
-    expect(service).toBeDefined();
-  });
 });

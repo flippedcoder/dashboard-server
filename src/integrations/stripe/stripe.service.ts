@@ -1,58 +1,75 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Order, Prisma } from '@prisma/client';
-import { PrismaService } from '../utils/prisma.service';
-
-interface Product {
-  name: string;
-  price: number;
-  inStock: number;
-  lastOrdered: Date;
-  totalOrders: number;
-}
+import { PrismaService } from 'src/utils/prisma.service';
+import Stripe from 'stripe';
+import { CreateStripePaymentDto, CreateStripeProductDto } from './stripe.interface';
 
 @Injectable()
 export class StripeService {
   constructor(private prisma: PrismaService) {}
   private readonly logger = new Logger(StripeService.name);
+  // Keep the version string like this because Stripe said so
+  private stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-08-16' });
 
-  public async orders(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.OrderWhereUniqueInput;
-    where?: Prisma.OrderWhereInput;
-    orderBy?: Prisma.OrderOrderByWithRelationInput;
-  }): Promise<Order[]> {
-    const { skip, take, cursor, where, orderBy } = params;
-    this.logger.log('Got all orders');
-    return await this.prisma.order.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
+  public async createProduct(product: CreateStripeProductDto) {
+    this.logger.log('Started product update in Stripe');
+    try {
+      const productResponse = await this.stripe.products.create({
+        name: product.name,
+        description: product.description,
+      });
+
+      this.logger.log('Adding product price info in Stripe');
+      const priceResponse = await this.stripe.prices.create({
+        product: productResponse.id,
+        unit_amount: 1009,
+        currency: 'usd',
+      });
+
+      const productRecord = {
+        stripeProductId: productResponse.id,
+        name: productResponse.name,
+        price: priceResponse.unit_amount,
+      };
+
+      await this.prisma.product.create({ data: productRecord });
+
+      this.logger.log('Created product in DB');
+    } catch (err) {
+      this.logger.error('Stripe failed');
+
+      throw new Error('Stripe failed');
+    }
   }
 
-  public async order(orderWhereUniqueInput: Prisma.OrderWhereUniqueInput): Promise<Order | null> {
-    this.logger.log('Got the one order');
-    return await this.prisma.order.findUnique({
-      where: orderWhereUniqueInput,
-    });
-  }
+  public async createPayment({
+    payment,
+    origin,
+    res,
+  }: {
+    payment: CreateStripePaymentDto;
+    origin: string;
+    res: any;
+  }) {
+    this.logger.log('Started payment in Stripe');
 
-  public async createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
-    this.logger.log('Made a new order');
-    return await this.prisma.order.create({
-      data,
-    });
-  }
+    try {
+      // Create Checkout Sessions from body params.
+      const session = await this.stripe.checkout.sessions.create({
+        line_items: [
+          {
+            // Provide the exact Price ID (for example, price_H5ggYwtDq4fbrJ) of the product you want to sell
+            price: payment.priceId,
+            quantity: payment.quantity,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${origin}/?success=true`,
+        cancel_url: `${origin}/?canceled=true`,
+      });
 
-  public async updateOrder(params: { where: Prisma.OrderWhereUniqueInput; data: Prisma.OrderUpdateInput }): Promise<Order> {
-    this.logger.log('Updated existing order');
-    const { data, where } = params;
-    return await this.prisma.order.update({
-      data,
-      where,
-    });
+      res.status(303).redirect(session.url);
+    } catch (err) {
+      throw Error('Something happened with Stripe');
+    }
   }
 }
