@@ -14,6 +14,9 @@ export class CreateOrderDto {
 
   @IsNumber()
   total: number;
+
+  @IsNotEmpty()
+  stripeInvoiceId: string;
 }
 
 export class UpdateOrderDto {

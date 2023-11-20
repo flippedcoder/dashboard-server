@@ -84,17 +84,17 @@ export class OrdersService {
     });
   }
 
-  public async getFeaturedProductsList(): Promise<Product[]> {
-    this.logger.log('Got featured products');
-    const allOrders = await this.prisma.order.findMany();
-    const ordersByQuantity = allOrders.sort((orderA, orderB) => orderA.quantity - orderB.quantity);
-    const products: Product[] = ordersByQuantity.map((order) => ({
-      name: order.name,
-      price: order.total / order.quantity,
-      lastOrdered: order.createdAt,
-      totalOrders: order.quantity,
-      inStock: order.quantity,
-    }));
-    return products;
-  }
+  // public async getFeaturedProductsList(): Promise<Product[]> {
+  //   this.logger.log('Got featured products');
+  //   const allOrders = await this.prisma.order.findMany();
+  //   const ordersByQuantity = allOrders.sort((orderA, orderB) => orderA.quantity - orderB.quantity);
+  //   const products: Product[] = ordersByQuantity.map((order) => ({
+  //     name: order.name,
+  //     price: order.total / order.quantity,
+  //     lastOrdered: order.createdAt,
+  //     totalOrders: order.quantity,
+  //     inStock: order.quantity,
+  //   }));
+  //   return products;
+  // }
 }

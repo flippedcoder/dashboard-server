@@ -2,18 +2,18 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/c
 import { Product } from './products.interface';
 import { ProductsService } from './products.service';
 
-@Controller('orders')
+@Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  public async orders(): Promise<Array<Product>> {
-    return await this.productsService.orders({});
+  public async products(): Promise<Array<Product>> {
+    return await this.productsService.products({});
   }
 
   @Get(':id')
-  public async order(@Param('id', ParseIntPipe) id: number): Promise<Product> {
-    return await this.productsService.order({ id });
+  public async product(@Param('id', ParseIntPipe) id: number): Promise<Product> {
+    return await this.productsService.product({ id });
   }
 
   @Post()

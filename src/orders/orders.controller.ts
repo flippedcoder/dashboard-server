@@ -23,8 +23,17 @@ export class OrdersV1Controller {
     if (!user) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
-    if (!user.permissions.includes('get:orders')) {
+    if (!user.permissions.includes('create:orders')) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+    if (!order) {
+      throw new HttpException('No order data', HttpStatus.BAD_REQUEST);
+    }
+    if (!order.name) {
+      throw new HttpException('No order name', HttpStatus.CONFLICT);
+    }
+    if (!order.total) {
+      throw new HttpException('No order total', HttpStatus.CONFLICT);
     }
 
     try {
