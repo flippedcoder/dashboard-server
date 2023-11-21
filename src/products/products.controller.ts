@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  CacheKey,
+  CacheTTL,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  UseInterceptors,
+} from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Product } from './products.interface';
 import { ProductsService } from './products.service';
 
@@ -6,6 +18,9 @@ import { ProductsService } from './products.service';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @UseInterceptors(CacheInterceptor) // Automatically cache the response for this endpoint
+  @CacheKey('products')
+  @CacheTTL(30) // override TTL to 30 seconds
   @Get()
   public async products(): Promise<Array<Product>> {
     return await this.productsService.products({});
