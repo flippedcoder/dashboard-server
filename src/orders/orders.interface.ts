@@ -1,28 +1,33 @@
+import { Product } from '@prisma/client';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export interface Order {
   id: number;
-  name: string;
   total: number;
   createdAt: Date;
   updatedAt: Date;
+  products: Product[];
+  userId: number;
 }
 
 export class CreateOrderDto {
-  @IsNotEmpty()
-  name: string;
-
   @IsNumber()
   total: number;
 
   @IsNotEmpty()
-  stripeInvoiceId: string;
+  products: Product[];
+
+  @IsNotEmpty()
+  userId: number;
 }
 
 export class UpdateOrderDto {
-  @IsNotEmpty()
-  name: string;
-
   @IsNumber()
   total: number;
+
+  @IsNotEmpty()
+  products: Product[];
+
+  @IsNotEmpty()
+  userId: number;
 }

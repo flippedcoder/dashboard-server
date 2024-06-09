@@ -1,14 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Order, Prisma } from '@prisma/client';
 import { PrismaService } from '../utils/prisma.service';
-
-interface Product {
-  name: string;
-  price: number;
-  inStock: number;
-  lastOrdered: Date;
-  totalOrders: number;
-}
+import datadogLogger from '../utils/loggers/datadog';
 
 @Injectable()
 export class OrdersService {
@@ -23,6 +16,8 @@ export class OrdersService {
     orderBy?: Prisma.OrderOrderByWithRelationInput;
   }): Promise<Order[]> {
     const { skip, take, cursor, where, orderBy } = params;
+    this.logger.log('GET /v1/orders requested');
+    datadogLogger.info('GET /v1/orders requested');
     this.logger.log('Got all orders');
     return await this.prisma.order.findMany({
       skip,
@@ -55,7 +50,7 @@ export class OrdersService {
     data: Prisma.OrderUpdateInput;
   }): Promise<Order> {
     const { data, where } = params;
-    this.logger.log(`Updated existing order ${data.name}`);
+    this.logger.log(`Updated existing order ${where.id}`);
 
     try {
       const updatedOrder = await this.prisma.order.update({
@@ -70,7 +65,7 @@ export class OrdersService {
 
       return updatedOrder;
     } catch (err) {
-      this.logger.log(`Updated for existing order ${data.name} failed`);
+      this.logger.log(`Updated for existing order ${where.id} failed`);
 
       throw new HttpException(err.message, HttpStatus.CONFLICT);
     }
