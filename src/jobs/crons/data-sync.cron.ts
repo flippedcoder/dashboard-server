@@ -1,26 +1,52 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import Stripe from 'stripe';
 import { PrismaService } from 'src/utils/prisma.service';
+import { CronJob } from 'cron';
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private schedulerRegistry: SchedulerRegistry) {}
   // Keep the version string like this because Stripe said so
   private stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-08-16' });
   private readonly logger = new Logger(TasksService.name);
+  private syncDate = new Date();
 
-  @Cron('5 00 * * *')
-  async cronSyncStripeOrders() {
+  onModuleInit() {
+    this.addCronJob('sync_stripe_orders', '5 00 * * *', this.cronSyncStripeOrders.bind(this));
+  }
+
+  /**
+   *  Adds a dynamic cron job
+   *
+   * @param cronName - cron job name
+   * @param cronExpression - cron interval expression
+   * @param cronCallback - the function that will handle the actual actions of the cron job
+   */
+  addCronJob(name: string, cronExpression: string, callback: (syncDate: Date) => Promise<void>) {
+    const job = new CronJob({
+      cronTime: cronExpression,
+      timeZone: 'America/New_York',
+      onTick: () => callback(this.syncDate),
+    });
+
+    this.schedulerRegistry.addCronJob(name, job);
+    job.start();
+
+    this.logger.log(
+      `The cron job ${name} has been added with cron expression : ${cronExpression}.`,
+    );
+  }
+
+  async cronSyncStripeOrders(syncDate: Date) {
     this.logger.debug(`Stripe orders sync started at ${new Date()}`);
 
-    const today = new Date();
-    const yesterday = today.setDate(today.getDate() - 1);
+    const previousDate = syncDate.setDate(syncDate.getDate() - 1);
 
     // Set params to get the invoices that have been created since yesterday
     const params = {
       created: {
-        gte: yesterday,
+        gte: previousDate,
       },
     };
 
@@ -29,7 +55,7 @@ export class TasksService {
 
     // Check that there are new invoices to process
     if (latestInvoices.length === 0) {
-      this.logger.debug(`No new Stripe invoices since ${yesterday}`);
+      this.logger.debug(`No new Stripe invoices since ${previousDate}`);
       return;
     }
 
@@ -42,7 +68,13 @@ export class TasksService {
       };
 
       try {
-        await this.prisma.order.create({ data: orderRecord });
+        const doesOrderRecordExist = await this.prisma.order.findUnique({
+          where: { stripeInvoiceId: invoice.id },
+        });
+
+        if (!doesOrderRecordExist) {
+          await this.prisma.order.create({ data: orderRecord });
+        }
       } catch (error) {
         this.logger.debug(`Something happened with invoice ${invoice.id}: ${error}`);
       }
