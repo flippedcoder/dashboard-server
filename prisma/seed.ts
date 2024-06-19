@@ -9,6 +9,7 @@ const main = async () => {
     createdAt: faker.date.anytime(),
     updatedAt: faker.date.anytime(),
     userId: 5,
+    stripeInvoiceId: faker.string.alphanumeric(15),
   }));
 
   const productData = [...Array(10)].map(() => ({
@@ -21,10 +22,11 @@ const main = async () => {
 
   await db.user.create({
     data: {
-      id: 5,
+      id: faker.number.int({ min: 5, max: 10 }),
       name: faker.person.fullName(),
       address: faker.location.streetAddress(),
       email: faker.internet.email(),
+      roles: ['Customer', 'Support', 'Store'],
     },
   });
 
