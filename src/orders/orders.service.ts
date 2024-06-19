@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Order, Prisma } from '@prisma/client';
 import { PrismaService } from '../utils/prisma.service';
 import datadogLogger from '../utils/loggers/datadog';
+import { CreateOrderDto, UpdateOrderDto } from './orders.interface';
 
 @Injectable()
 export class OrdersService {
@@ -35,19 +36,29 @@ export class OrdersService {
     });
   }
 
-  public async createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
-    this.logger.log('Made a new order');
-    data.createdAt = new Date();
-    data.updatedAt = new Date();
+  public async createOrder(data: CreateOrderDto): Promise<Order> {
+    const modifiedOrder = { ...data, createdAt: new Date(), updatedAt: new Date() };
 
-    return await this.prisma.order.create({
-      data,
+    this.logger.debug(`Made a new order: ${JSON.stringify(modifiedOrder)}`);
+
+    const newOrder = await this.prisma.order.create({
+      data: {
+        total: modifiedOrder.total,
+        createdAt: modifiedOrder.createdAt,
+        userId: modifiedOrder.userId,
+        updatedAt: modifiedOrder.updatedAt,
+        products: {
+          connect: modifiedOrder.products.map((product) => ({ id: product.id })),
+        },
+      },
     });
+
+    return newOrder;
   }
 
   public async updateOrder(params: {
     where: Prisma.OrderWhereUniqueInput;
-    data: Prisma.OrderUpdateInput;
+    data: UpdateOrderDto;
   }): Promise<Order> {
     const { data, where } = params;
     this.logger.log(`Updated existing order ${where.id}`);
@@ -55,7 +66,11 @@ export class OrdersService {
     try {
       const updatedOrder = await this.prisma.order.update({
         data: {
-          ...data,
+          total: data.total,
+          userId: data.userId,
+          products: {
+            connect: data.products.map((product) => ({ id: product.id })),
+          },
           updatedAt: new Date(),
         },
         where,

@@ -48,7 +48,7 @@ describe.only('OrdersController', () => {
       id: 1001,
       email: 'tester@rest.com',
       name: 'Tester Rest',
-      permissions: ['get:orders'],
+      permissions: ['get:products'],
     };
 
     await controller.create(badPermissionsUser, order);
@@ -62,7 +62,7 @@ describe.only('OrdersController', () => {
     expect(controller.create).toThrowError('No order data');
   });
 
-  it('throws conflict error if the order name is missing', async () => {
+  it('throws conflict error if products are missing from the order', async () => {
     const orderWithoutName = {
       total: 125.99,
       stripeInvoiceId: 'stripeInvoiceId',

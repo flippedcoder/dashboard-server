@@ -11,28 +11,27 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CreateOrderDto, Order, UpdateOrderDto } from './orders.interface';
+import { CreateOrderDto, Order, UpdateOrderDto, User } from './orders.interface';
 import { OrdersService } from './orders.service';
-import { User } from '@prisma/client';
 
-@Controller('/v1/orders')
+@Controller('v1/orders')
 export class OrdersV1Controller {
   constructor(private readonly ordersService: OrdersService) {}
   private readonly logger = new Logger(OrdersService.name);
 
   @Post()
-  public async create(@Body() user: User, order: CreateOrderDto): Promise<Order> {
+  public async create(@Body() user: User, order: CreateOrderDto): Promise<Omit<Order, 'products'>> {
     if (!user) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
-    if (!user.permissions.includes('create:orders')) {
+    if (!user.roles.includes('Customer')) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
     if (!order) {
       throw new HttpException('No order data', HttpStatus.BAD_REQUEST);
     }
-    if (!order.name) {
-      throw new HttpException('No order name', HttpStatus.CONFLICT);
+    if (order.products.length === 0) {
+      throw new HttpException('No products in order', HttpStatus.CONFLICT);
     }
     if (!order.total) {
       throw new HttpException('No order total', HttpStatus.CONFLICT);
@@ -47,7 +46,7 @@ export class OrdersV1Controller {
   }
 
   @Get()
-  public async orders(@Param() user: User): Promise<Order[]> {
+  public async orders(@Param() user: User): Promise<Omit<Order, 'products'>[]> {
     // if (!user) {
     //   throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     // }
@@ -67,7 +66,7 @@ export class OrdersV1Controller {
   }
 
   @Get(':id')
-  public async order(@Param('id', ParseIntPipe) id: number): Promise<Order> {
+  public async order(@Param('id', ParseIntPipe) id: number): Promise<Omit<Order, 'products'>> {
     return await this.ordersService.order({ id });
   }
 
@@ -75,7 +74,7 @@ export class OrdersV1Controller {
   public async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() order: UpdateOrderDto,
-  ): Promise<Order> {
+  ): Promise<Omit<Order, 'products'>> {
     try {
       return await this.ordersService.updateOrder({
         where: { id },
@@ -90,7 +89,7 @@ export class OrdersV1Controller {
   }
 
   @Delete(':id')
-  public async delete(@Param('id', ParseIntPipe) id: number): Promise<Order> {
+  public async delete(@Param('id', ParseIntPipe) id: number): Promise<Omit<Order, 'products'>> {
     return await this.ordersService.deleteOrder({ where: { id } });
   }
 }
