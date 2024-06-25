@@ -11,16 +11,11 @@ export class StripeService {
   private stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-08-16' });
 
   public async createProduct(product: CreateStripeProductDto) {
-    this.logger.log(
-      `FROM: 'post /v1/stripe/products' in stripe.controller.createProduct. Started product creation in Stripe with product data: ${JSON.stringify(
-        product,
-      )}`,
+    this.logger.debug(
+      `Started product creation in Stripe with product data: ${JSON.stringify(product, null, 2)}`,
     );
 
     try {
-      this.logger.log(
-        `Send name: ${product.name} and description: ${product.description} with stripe.products.create sdk`,
-      );
       const productResponse = await this.stripe.products.create({
         name: product.name,
         description: product.description,
@@ -55,9 +50,9 @@ export class StripeService {
         const [dbProduct] = await this.prisma.$transaction([
           this.prisma.product.create({ data: productRecord }),
         ]);
-        this.logger.log(`Created product id: ${dbProduct.id} in product table`);
+        this.logger.debug(`Created product id: ${dbProduct.id} in product table`);
       } catch (err) {
-        this.logger.log(
+        this.logger.debug(
           `DB rollback for product record: ${JSON.stringify(
             productRecord,
           )} with error: ${JSON.stringify(err)}`,

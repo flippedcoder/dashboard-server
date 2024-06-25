@@ -15,3 +15,9 @@
 - Test plan
   - Monitoring and alerts
   - Manual testing
+  - Stress testing
+- Cost tradeoffs
+- How is scaling managed
+  - Manually
+  - Scheduled
+  - Automatically
