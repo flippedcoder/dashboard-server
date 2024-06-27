@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import Stripe from 'stripe';
 import { PrismaService } from 'src/utils/prisma.service';
 import { CronJob } from 'cron';
 
 @Injectable()
-export class TasksService {
+export class TasksService implements OnModuleInit{
   constructor(private prisma: PrismaService, private schedulerRegistry: SchedulerRegistry) {}
   // Keep the version string like this because Stripe said so
   private stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-08-16' });
@@ -24,7 +24,7 @@ export class TasksService {
    * @param cronCallback - the function that will handle the actual actions of the cron job
    */
   addCronJob(name: string, cronExpression: string, callback: (syncDate: Date) => Promise<void>) {
-    const job = new CronJob({
+    const job = CronJob.from({
       cronTime: cronExpression,
       timeZone: 'America/New_York',
       onTick: () => callback(this.syncDate),
