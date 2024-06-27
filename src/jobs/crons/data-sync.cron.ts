@@ -12,6 +12,7 @@ export class TasksService implements OnModuleInit{
   private readonly logger = new Logger(TasksService.name);
   private syncDate = new Date();
 
+  // Implement method to register cronJob on module Init
   onModuleInit() {
     this.addCronJob('sync_stripe_orders', '5 00 * * *', this.cronSyncStripeOrders.bind(this));
   }
